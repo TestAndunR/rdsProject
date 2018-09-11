@@ -1,32 +1,27 @@
 let AWS = require('aws-sdk');
+let SL_TWITTER = require('slappforge-sdk-twitter');
+let twitterClients = require('./TwitterClients');
+const twitter = new SL_TWITTER.TwitterP(twitterClients);
 let SL_AWS = require('slappforge-sdk-aws');
 let connectionManager = require('./ConnectionManager');
 const rds = new SL_AWS.RDS(connectionManager);
 
+let search = "serverless";
+let count = 10;
 exports.handler = function (event, context, callback) {
-
-    // You can pass the existing connection to this function.
-    // A new connection will be created if it's not present as the third param 
-    // You must always end/destroy the DB connection after it's used
-    rds.query({
-        instanceIdentifier: 'issueValidation',
-        query: 'INSERT into Person(PersonID, LastName, FirstName,Address,City)Values(?,?,?,?,?)',
-        inserts: [0, Kannangara, Andun, Galle, Galle]
-    }, function (error, results, connection) {
-        if (error) {
-            console.log("Error occurred");
-            throw error;
-        } else {
-            console.log("Success")
-            console.log(results);
-        }
-
-        connection.end();
-
-        // You can pass the existing connection to this function.
-        // A new connection will be created if it's not present as the third param 
-        // You must always end/destroy the DB connection after it's used
+    twitter.searchTweets({
+        "searchParams": {
+            "q": search,
+            "count": count
+        },
+        "clientName": "twClient"
+    }).then(response => {
+        let data = response.data;
+        console.log(data);
+    }).catch(err => {
+        console.log(err);
     });
+
 
     callback(null, 'Successfully executed');
 }
